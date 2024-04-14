@@ -3,256 +3,389 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Objetivo Principal</title>
+    <title>Kanban Board</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
+            padding: 0;
+        }
+        .kanban-board {
+            display: flex;
+            justify-content: space-between;
             padding: 20px;
+            background-color: #f4f4f4;
         }
-        h1 {
-            text-align: center;
+        .kanban-column {
+            flex: 1;
+            margin: 0 10px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        .key-results-container {
-            max-width: 600px;
-            margin: 0 auto;
+        .kanban-column h2 {
+            margin-top: 0;
         }
-        .key-result-input {
+        .kanban-card {
+            background-color: #fff;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: move;
+        }
+        .kanban-card h3 {
+            margin-top: 0;
+        }
+        .kanban-card p {
+            margin-bottom: 0;
+        }
+        .kanban-card {
+            transition: transform 0.3s ease;
+        }
+        .kanban-card:hover {
+            transform: scale(1.05);
+        }
+        .kanban-card.dragging {
+            opacity: 0.5;
+        }
+        .kanban-column.over {
+            background-color: #f0f0f0;
+        }
+        .kanban-card textarea {
             width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            margin-bottom: 20px;
+            resize: vertical;
         }
-        .button-container1 {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
+        .kanban-card button {
+            margin-top: 5px;
         }
-        .button-container2 {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
+        .add-card-button {
+            margin-top: 10px;
         }
-        .key-result-button {
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            cursor: pointer;
+        .add-card-form {
+            margin-top: 10px;
         }
-        .key-result-button:hover {
-            opacity: 0.8;
+        .add-card-form input,
+        .add-card-form textarea {
+            width: 100%;
+            margin-bottom: 5px;
         }
-        #saveKeyResultButton {
-            background-color: #0CAF50;
-            color: white;
+        .add-card-form button {
+            margin-right: 5px;
         }
-        #deleteAllButton {
-            background-color: #f44336;
-            color: white;
-        }
-        #saveStateButton {
-            background-color: #2196F3;
-            color: white;
-        }
-        #loadStateButton {
-            background-color: #ff8ada;
-            color: white;
-        }
-        .key-results-display {
-            margin-top: 20px;
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #f1f1f1;
-            border-radius: 5px;
-        }
-        .key-result-item {
-            margin-bottom: 10px;
-        }
-        .key-result-item input[type="checkbox"] {
-            margin-right: 10px;
-        }
-        .key-result-item .delete-button {
-            color: red;
-            cursor: pointer;
+   
+        .add-column-button {
             margin-left: 10px;
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
         }
-        .metrics-container {
-            margin-top: 40px;
+        .add-column-form {
+            margin-left: 10px;
+            margin-top: 10px;
         }
-        .metrics-container h2 {
-            margin-bottom: 10px;
-        }
-        .metric-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .metric-item span {
-            margin-right: 10px;
+        .add-column-form input {
+            margin-right: 5px;
         }
     </style>
 </head>
 <body>
-    <h1>Objetivo Principal</h1>
-    <div class="key-results-container">
-        <input type="text" id="keyResultInput" class="key-result-input" placeholder="Digite o resultado chave">
-        <div class="button-container1">
-            <button id="saveKeyResultButton" class="key-result-button">Incluir Item</button>
-            <button id="deleteAllButton" class="key-result-button">Excluir Tudo</button>
+<button class="add-column-button">Adicionar Coluna</button>
+    <div class="kanban-board">
+        <div class="kanban-column">
+            <h2>To Do</h2>
+            <button class="add-card-button">Adicionar Cartão</button>
         </div>
-        <div id="keyResultsDisplay" class="key-results-display"></div>
-        <div class="button-container2">
-            <button id="saveStateButton" class="key-result-button">Salvar Estado</button>
-            <button id="loadStateButton" class="key-result-button">Carregar Estado</button>
+        <div class="kanban-column">
+            <h2>In Progress</h2>
+            <button class="add-card-button">Adicionar Cartão</button>
+        </div>
+        <div class="kanban-column">
+            <h2>Done</h2>
+            <button class="add-card-button">Adicionar Cartão</button>
         </div>
     </div>
-
-    <div class="metrics-container">
-        <h2>Métricas</h2>
-        <div id="metricsDisplay"></div>
     </div>
+    <button class="save-state-button" onclick="saveState()">Salvar Estado</button>
+<button class="load-state-button" onclick="loadState()">Carregar Estado</button>
 
     <script>
-        const keyResultInput = document.getElementById('keyResultInput');
-        const saveKeyResultButton = document.getElementById('saveKeyResultButton');
-        const deleteAllButton = document.getElementById('deleteAllButton');
-        const saveStateButton = document.getElementById('saveStateButton');
-        const loadStateButton = document.getElementById('loadStateButton');
-        const keyResultsDisplay = document.getElementById('keyResultsDisplay');
+        const kanbanBoard = document.querySelector('.kanban-board');
+        let draggedCard = null;
 
-        saveKeyResultButton.addEventListener('click', saveKeyResult);
-        deleteAllButton.addEventListener('click', deleteAllKeyResults);
-        saveStateButton.addEventListener('click', saveState);
-        loadStateButton.addEventListener('click', loadState);
-
-        function saveKeyResult() {
-            const keyResult = keyResultInput.value.trim();
-            if (keyResult !== '') {
-                const keyResults = JSON.parse(localStorage.getItem('keyResults')) || [];
-                keyResults.push({ text: keyResult, completed: false });
-                localStorage.setItem('keyResults', JSON.stringify(keyResults));
-                keyResultInput.value = '';
-                renderKeyResults(keyResults);
-                updateMetrics();
-            }
+        // Function to create a new card
+        function createCard(column, title, description) {
+            const card = document.createElement('div');
+            card.classList.add('kanban-card');
+            card.draggable = true;
+            card.innerHTML = `
+                <h3>${title}</h3>
+                <p>${description}</p>
+                <textarea style="display: none;">${description}</textarea>
+                <button class="edit-button">Edit</button>
+                <button class="delete-button">Delete</button>
+            `;
+            column.insertBefore(card, column.lastElementChild);
+            addCardEventListeners(card);
         }
 
-        function deleteAllKeyResults() {
-            if (confirm('Tem certeza de que deseja excluir todos os resultados chave?')) {
-                localStorage.removeItem('keyResults');
-                keyResultsDisplay.innerHTML = '';
-                updateMetrics();
-            }
+        // Function to add event listeners to a card
+        function addCardEventListeners(card) {
+            const editButton = card.querySelector('.edit-button');
+            const deleteButton = card.querySelector('.delete-button');
+            const textarea = card.querySelector('textarea');
+
+            editButton.addEventListener('click', () => {
+                card.classList.toggle('editing');
+                if (card.classList.contains('editing')) {
+                    textarea.style.display = 'block';
+                    editButton.textContent = 'Save';
+                } else {
+                    const newDescription = textarea.value;
+                    card.querySelector('p').textContent = newDescription;
+                    textarea.style.display = 'none';
+                    editButton.textContent = 'Edit';
+                }
+            });
+
+            deleteButton.addEventListener('click', () => {
+                card.remove();
+            });
+
+            card.addEventListener('dragstart', dragStart);
+            card.addEventListener('dragend', dragEnd);
         }
 
-        function renderKeyResults(keyResults = []) {
-            keyResultsDisplay.innerHTML = '';
-            keyResults.forEach((keyResult, index) => {
-                const keyResultItem = document.createElement('div');
-                keyResultItem.classList.add('key-result-item');
+        // Function to handle drag start event
+        function dragStart(e) {
+            draggedCard = e.target;
+            e.target.classList.add('dragging');
+        }
 
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.checked = keyResult.completed;
-                checkbox.addEventListener('change', () => {
-                    keyResult.completed = checkbox.checked;
-                    localStorage.setItem('keyResults', JSON.stringify(keyResults));
-                    updateMetrics();
-                });
+        // Function to handle drag end event
+        function dragEnd(e) {
+            e.target.classList.remove('dragging');
+            draggedCard = null;
+        }
 
-                const keyResultText = document.createElement('span');
-                keyResultText.textContent = keyResult.text;
+        // Function to handle drag over event
+        function dragOver(e) {
+            e.preventDefault();
+            const column = e.target.closest('.kanban-column');
+            column.classList.add('over');
+        }
 
-                const deleteButton = document.createElement('span');
-                deleteButton.classList.add('delete-button');
-                deleteButton.textContent = 'Excluir';
-                deleteButton.addEventListener('click', () => {
-                    if (confirm('Tem certeza de que deseja excluir este resultado chave?')) {
-                        keyResults.splice(index, 1);
-                        localStorage.setItem('keyResults', JSON.stringify(keyResults));
-                        renderKeyResults(keyResults);
-                        updateMetrics();
+        // Function to handle drag leave event
+        function dragLeave(e) {
+            const column = e.target.closest('.kanban-column');
+            column.classList.remove('over');
+        }
+
+        // Function to handle drop event
+        function drop(e) {
+            e.preventDefault();
+            const column = e.target.closest('.kanban-column');
+            column.insertBefore(draggedCard, column.lastElementChild);
+            column.classList.remove('over');
+        }
+
+        // Add event listeners to columns
+        const columns = document.querySelectorAll('.kanban-column');
+        columns.forEach(column => {
+            column.addEventListener('dragover', dragOver);
+            column.addEventListener('dragleave', dragLeave);
+            column.addEventListener('drop', drop);
+        });
+
+        // Function to save the state of the Kanban board
+        function saveState() {
+            const state = {};
+            columns.forEach((column, index) => {
+                const cards = Array.from(column.querySelectorAll('.kanban-card'));
+                state[`column${index}`] = cards.map(card => ({
+                    title: card.querySelector('h3').textContent,
+                    description: card.querySelector('p').textContent
+                }));
+            });
+            localStorage.setItem('kanbanState', JSON.stringify(state));
+        }
+
+        // Function to load the state of the Kanban board
+        function loadState() {
+            const state = JSON.parse(localStorage.getItem('kanbanState'));
+            if (state) {
+                columns.forEach((column, index) => {
+                    const columnKey = `column${index}`;
+                    if (state[columnKey]) {
+                        state[columnKey].forEach(card => {
+                            createCard(column, card.title, card.description);
+                        });
                     }
                 });
-
-                keyResultItem.appendChild(checkbox);
-                keyResultItem.appendChild(keyResultText);
-                keyResultItem.appendChild(deleteButton);
-                keyResultsDisplay.appendChild(keyResultItem);
-            });
-        }
-
-        function saveState() {
-            const state = {
-                keyResults: JSON.parse(localStorage.getItem('keyResults')) || []
-            };
-            const stateJson = JSON.stringify(state);
-            const blob = new Blob([stateJson], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-
-            // Solicitar o nome do arquivo ao usuário
-            const fileName = prompt('Digite o nome do arquivo:', 'objetivo-principal-state.json');
-
-            // Verificar se o usuário forneceu um nome de arquivo válido
-            if (fileName !== null && fileName.trim() !== '') {
-                link.download = fileName.trim();
-                link.style.display = 'none';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
             }
         }
 
-        function loadState() {
-            const fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.accept = 'application/json';
-            fileInput.addEventListener('change', (event) => {
-                const file = event.target.files[0];
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const stateJson = e.target.result;
-                    const state = JSON.parse(stateJson);
-                    localStorage.setItem('keyResults', JSON.stringify(state.keyResults));
-                    renderKeyResults(state.keyResults);
-                    updateMetrics();
-                };
-                reader.readAsText(file);
-            });
-            fileInput.click();
+        // Load the saved state when the page loads
+        loadState();
+
+        // Save the state periodically
+        //setInterval(saveState, 5000);
+
+        // Function to handle adding a new card
+        function handleAddCard(e) {
+            e.preventDefault();
+            const title = e.target.querySelector('input').value;
+            const description = e.target.querySelector('textarea').value;
+            const column = e.target.closest('.kanban-column');
+            if (title && description) {
+                createCard(column, title, description);
+                e.target.reset();
+                e.target.remove();
+            }
         }
 
-        function updateMetrics() {
-            const keyResults = JSON.parse(localStorage.getItem('keyResults')) || [];
-            const totalResults = keyResults.length;
-            const completedResults = keyResults.filter(keyResult => keyResult.completed).length;
-            const completionPercentage = totalResults > 0 ? Math.round((completedResults
-/ totalResults) * 100) : 0;
+        // Function to create the add card form
+        function createAddCardForm() {
+            const form = document.createElement('form');
+            form.classList.add('add-card-form');
+            form.innerHTML = `
+                <input type="text" placeholder="Card Title" required>
+                <textarea placeholder="Card Description" required></textarea>
+                <button type="submit">Add</button>
+                <button type="button" class="cancel-button">Cancel</button>
+            `;
+            form.addEventListener('submit', handleAddCard);
+            form.querySelector('.cancel-button').addEventListener('click', () => {
+                form.remove();
+            });
+            return form;
+        }
 
-        const metricsDisplay = document.getElementById('metricsDisplay');
-        metricsDisplay.innerHTML = `
-            <div class="metric-item">
-                <span>Total de Resultados:</span>
-                <span>${totalResults}</span>
-            </div>
-            <div class="metric-item">
-                <span>Resultados Concluídos:</span>
-                <span>${completedResults}</span>
-            </div>
-            <div class="metric-item">
-                <span>Porcentagem de Conclusão:</span>
-                <span>${completionPercentage}%</span>
-            </div>
-        `;
+        // Add event listeners to "Add Card" buttons
+        const addCardButtons = document.querySelectorAll('.add-card-button');
+        addCardButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const column = button.closest('.kanban-column');
+                const form = createAddCardForm();
+                column.appendChild(form);
+            });
+        });
+
+        // ... (código JavaScript posterior) ...
+
+        // Function to create a new column
+        function createColumn(title) {
+            const column = document.createElement('div');
+            column.classList.add('kanban-column');
+            column.innerHTML = `
+                <h2>${title}</h2>
+                <button class="add-card-button">Adicionar Cartão</button>
+            `;
+            kanbanBoard.appendChild(column);
+            addColumnEventListeners(column);
+        }
+
+        // Function to add event listeners to a column
+        function addColumnEventListeners(column) {
+            column.addEventListener('dragover', dragOver);
+            column.addEventListener('dragleave', dragLeave);
+            column.addEventListener('drop', drop);
+
+            const addCardButton = column.querySelector('.add-card-button');
+            addCardButton.addEventListener('click', () => {
+                const form = createAddCardForm();
+                column.appendChild(form);
+            });
+        }
+
+        // Function to handle adding a new column
+        function handleAddColumn(e) {
+            e.preventDefault();
+            const title = e.target.querySelector('input').value;
+            if (title) {
+                createColumn(title);
+                e.target.reset();
+                e.target.remove();
+            }
+        }
+
+        // Function to create the add column form
+        function createAddColumnForm() {
+            const form = document.createElement('form');
+            form.classList.add('add-column-form');
+            form.innerHTML = `
+                <input type="text" placeholder="Column Title" required>
+                <button type="submit">Add</button>
+                <button type="button" class="cancel-button">Cancel</button>
+            `;
+            form.addEventListener('submit', handleAddColumn);
+            form.querySelector('.cancel-button').addEventListener('click', () => {
+                form.remove();
+            });
+            return form;
+        }
+
+        // Add event listener to "Add Column" button
+        const addColumnButton = document.querySelector('.add-column-button');
+        addColumnButton.addEventListener('click', () => {
+            const form = createAddColumnForm();
+            kanbanBoard.parentElement.insertBefore(form, addColumnButton.nextSibling);
+        });
+
+       function saveState() {
+    const state = {};
+    const columns = document.querySelectorAll('.kanban-column');
+    columns.forEach((column, index) => {
+        const cards = Array.from(column.querySelectorAll('.kanban-card'));
+        state[`column${index}`] = cards.map(card => ({
+            title: card.querySelector('h3').textContent,
+            description: card.querySelector('p').textContent
+        }));
+    });
+    const stateJson = JSON.stringify(state);
+    const blob = new Blob([stateJson], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+
+    const fileName = prompt('Digite o nome do arquivo:', 'kanban-state.json');
+    if (fileName !== null && fileName.trim() !== '') {
+        link.download = fileName.trim();
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     }
+}
 
-    // Carregar os resultados chave salvos ao carregar a página
-    const keyResults = JSON.parse(localStorage.getItem('keyResults')) || [];
-    renderKeyResults(keyResults);
-    updateMetrics();
-</script>
+function loadState() {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'application/json';
+    fileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const stateJson = e.target.result;
+            const state = JSON.parse(stateJson);
+            Object.keys(state).forEach((columnKey, index) => {
+                const column = document.querySelectorAll('.kanban-column')[index];
+                if (column) {
+                    state[columnKey].forEach(card => {
+                        createCard(column, card.title, card.description);
+                    });
+                }
+            });
+        };
+        reader.readAsText(file);
+    });
+    fileInput.click();
+}
+    </script>
 </body>
 </html>
